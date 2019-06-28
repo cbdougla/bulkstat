@@ -33,7 +33,8 @@ A typical example is:  find . -type f | bulkstat > bulkstat.csv
 ```
 
 
-```[cbd][jordan][/devl/cbd/sourcecode/bulkstat]$ find . -type f | ./bulkstat -H
+```
+[cbd][jordan][/devl/cbd/sourcecode/bulkstat]$ find . -type f | ./bulkstat -H
 Path|Bytes|Access Date|Mod Date|Create Date
 ./bulkstat_new.c|8560|2016-08-19|2016-08-19|2016-08-19
 ./bulkstat|15714|2016-08-19|2016-08-19|2016-08-19
