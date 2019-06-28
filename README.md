@@ -9,7 +9,7 @@ I showed this to a friend and he suggested that others might also find it useful
 
 I am not much of a programmer so I suspect it's pretty rough by most standards but it works for me.
 
-[cbd][jordan][/devl/cbd/sourcecode/bulkstat]$ ./bulkstat -h
+`[cbd][jordan][/devl/cbd/sourcecode/bulkstat]$ ./bulkstat -h
 
 Usage:  bulkstat [-i <infile>] [-o <outfile>] [-d <delimiter>] [-n <numlines>] [-bDhv]
         b: Set max buffer chunk size (default 512 bytes)
@@ -28,14 +28,14 @@ Usage:  bulkstat [-i <infile>] [-o <outfile>] [-d <delimiter>] [-n <numlines>] [
 
 Program will use STDIN and/or STDOUT if no file options are given
 
-A typical example is:  find . -type f | bulkstat > bulkstat.csv
+A typical example is:  find . -type f | bulkstat > bulkstat.csv`
 
 
-[cbd][jordan][/devl/cbd/sourcecode/bulkstat]$ find . -type f | ./bulkstat -H
+`[cbd][jordan][/devl/cbd/sourcecode/bulkstat]$ find . -type f | ./bulkstat -H
 Path|Bytes|Access Date|Mod Date|Create Date
 ./bulkstat_new.c|8560|2016-08-19|2016-08-19|2016-08-19
 ./bulkstat|15714|2016-08-19|2016-08-19|2016-08-19
 ./bulkstat.c~|8958|2016-08-19|2016-08-19|2016-08-19
 ./bulkstat.c|9038|2016-08-19|2016-08-19|2016-08-19
 ./bulkstat.csv|37377|2016-08-19|2016-08-19|2016-08-19
-./compile-bulkstat|49|2016-08-19|2016-08-19|2016-08-19
+./compile-bulkstat|49|2016-08-19|2016-08-19|2016-08-19`
