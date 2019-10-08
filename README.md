@@ -18,6 +18,8 @@ Usage:  bulkstat [-i <infile>] [-o <outfile>] [-d <delimiter>] [-n <numlines>] [
         g: Output group ID of file owner
         D: Print debugging info. (Set to a number for more info)
         H: Print header at top of list
+        m: Calculate MD5 checksum of file.
+           NOTE:  This will slow things down significantly
         n: Rolling count of number of lines processes
         p: Output separate pathname into dirname and filename fields
         P: Output all three dirname, filename, and pathname fields
