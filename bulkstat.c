@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
   int opt_s=0, opt_H=0, opt_p=0, opt_P=0, opt_m=0, maxchunk=MAXCHUNK;
 
   FILE *indata=NULL, *outdata=NULL, *errout, *pipeFILE;
-  struct stat *fileinfo;
+  struct stat *fileinfo, tmpstat;
   struct tm *at, *ct, *mt, *today;
   time_t temptime;
   
@@ -55,90 +55,90 @@ int main(int argc, char *argv[])
 
   fileinfo=malloc(sizeof(struct stat));
   checksum=calloc(33,sizeof(char));
+  at=malloc(sizeof(struct tm));
+  ct=malloc(sizeof(struct tm));
+  mt=malloc(sizeof(struct tm));
 
 
-  while ((c=getopt(argc,argv,"b:d:ghHpPuvmD::si:o:n:")) != EOF)
+  while ((c=getopt(argc,argv,"b:d:ghHpPuvmDsi:o:n:")) != EOF)
     switch (c)
     { case 'b':
-        maxchunk=atoi(optarg);
+	maxchunk=atoi(optarg);
         if (opt_D > 0)
-          fprintf(errout,"Setting MAXCHUNK to %d\n",maxchunk);
-        break;
+	  fprintf(errout,"Setting MAXCHUNK to %d\n",maxchunk);
+	break;
       case 'd': 
         opt_d=1; 
         d=optarg[0];
-        break;
+	break;
       case 'D': 
-        if ( optarg != NULL)
-          opt_D=atoi(optarg);
-        if ( ( opt_D < 1) || (opt_D > 127))
-          opt_D=1;
-        break;
+	  opt_D++;
+	break;
       case 'H': 
         opt_H=1; 
-        break;
+	break;
       case 'g': 
         opt_g=1; 
-        break;
+	break;
       case 'i':
-        infilename=calloc(50, sizeof(char));
-        strcpy(infilename,optarg);
+	infilename=calloc(50, sizeof(char));
+	strcpy(infilename,optarg);
         break;
       case 'm': 
         opt_m=1; 
-        break;
+	break;
       case 'n': 
-        if ( optarg == NULL)
-        { printf("Invalid option.  Must specify number of lins with -n\n");
-          printf("\n");
-          exit(EINVAL);
-        }
+	if ( optarg == NULL)
+	{ printf("Invalid option.  Must specify number of lins with -n\n");
+	  printf("\n");
+	  exit(EINVAL);
+	}
           opt_n=atoi(optarg); 
-        break;
+	break;
       case 'o':
-        outfilename=calloc(50, sizeof(char));
-        strcpy(outfilename,optarg);
+	outfilename=calloc(50, sizeof(char));
+	strcpy(outfilename,optarg);
         break;
       case 's': 
         opt_s=1; 
-        break;
+	break;
       case 'u': 
         opt_u=1; 
-        break;
+	break;
       case 'v': 
-        printf("\n");
-        printf("bulkstat version 1.4\n");
-        printf("by Collin Douglas\n");
-        printf("\n");
-        exit(0);
-        break;
+	printf("\n");
+        printf("bulkstat version 1.5\n");
+	printf("by Collin Douglas\n");
+	printf("\n");
+	exit(0);
+	break;
       case 'h':
-        printf("\n");
+	printf("\n");
         printf("Usage:  bulkstat [-i <infile>] [-o <outfile>] [-d <delimiter>] [-n <numlines>] [-bDhv]\n");
-        printf("\tb: Set max buffer chunk size (default %d bytes)\n",maxchunk);
-        printf("\td: Set output delimiter to argument instead of '|'\n");
-        printf("\tg: Output group ID of file owner\n");
-        printf("\tD: Print debugging info. (Set to a number for more info)\n");
-        printf("\tH: Print header at top of list\n");
-        printf("\tm: Calculate MD5 checksum of file.\n");
-        printf("\t   NOTE:  This will slow things down significantly\n");
-        printf("\tn: Rolling count of number of lines processes\n");
-        printf("\tp: Output separate pathname into dirname and filename fields\n");
-        printf("\tP: Output all three dirname, filename, and pathname fields\n");
+	printf("\tb: Set max buffer chunk size (default %d bytes)\n",maxchunk);
+	printf("\td: Set output delimiter to argument instead of '|'\n");
+	printf("\tg: Output group ID of file owner\n");
+	printf("\tD: Print debugging info. (Set to a number for more info)\n");
+	printf("\tH: Print header at top of list\n");
+	printf("\tm: Calculate MD5 checksum of file.\n");
+	printf("\t   NOTE:  This will slow things down significantly\n");
+	printf("\tn: Rolling count of number of lines processes\n");
+	printf("\tp: Output separate pathname into dirname and filename fields\n");
+	printf("\tP: Output all three dirname, filename, and pathname fields\n");
         printf("\ts: Include current date field in output file\n");
-        printf("\tu: Output user ID of file owner\n");
-        printf("\tv: Print version and exit\n\n");
-        printf("\th: This help screen\n\n");
-        printf("Program will use STDIN and/or STDOUT if no file options are given\n\n");
-        printf("A typical example is:  find . -type f | bulkstat > bulkstat.csv\n\n");
-        exit(0);
-        break;
+	printf("\tu: Output user ID of file owner\n");
+	printf("\tv: Print version and exit\n\n");
+	printf("\th: This help screen\n\n");
+	printf("Program will use STDIN and/or STDOUT if no file options are given\n\n");
+	printf("A typical example is:  find . -type f | bulkstat > bulkstat.csv\n\n");
+	exit(0);
+	break;
       case 'p': 
         opt_p=1; 
-        break;
+	break;
       case 'P': 
         opt_P=1; 
-        break;
+	break;
       default:
         printf("%s\n",strerror(errno));
         exit(errno);
@@ -228,55 +228,56 @@ int main(int argc, char *argv[])
  ****************************************************/
 
   while ( (chunksize=fread((buf),sizeof(char),maxchunk,indata)) > 0)
-  { if (opt_D >= 1)                                     /* debug option */
+  { if (opt_D >= 1)					/* debug option */
       fprintf(errout,"Read chunk: %d bytes -- ",chunksize);
 
-    for(filecount=0, x=0; x < chunksize; x++, pos++)
+    for(filecount=0, x=0; x < chunksize; x++, pos++)				
     { pathname[pos]=buf[x];
       if( (buf[x] == '\n') && (pos > 0))
       { lines++;
-        linestmp++;     /* insignificant variables used just for printing line numbers */
+        linestmp++;	/* insignificant variables used just for printing line numbers */
         if (opt_n)
-        { if (linestmp == opt_n)                        /* print line number option */
-          { printf("\t Processed %lld lines\n", lines);
-            linestmp=0;
-          }
-        }
+	{ if (linestmp == opt_n)			/* print line number option */
+	  { printf("\t Processed %lld lines\n", lines);
+	    linestmp=0;
+	  }
+	}
         pathname[pos] = '\0';
 
-        sprintf(pathstripped,"%s",pathname);                    /* strip the extra \n so it prints correctly */
+	sprintf(pathstripped,"%s",pathname);			/* strip the extra \n so it prints correctly */
 
-        if ( opt_D > 1)
+        if ( opt_D > 0)
           fprintf(errout,"pathname: %s\n",pathname);
 
  
-        err=lstat(pathname, fileinfo);
+	err=lstat(pathname, fileinfo);
 
-        if (opt_D > 3)
+        if (opt_D > 2)
         { fprintf(errout,"st_mtime: %ld\n",fileinfo->st_mtime);
           fprintf(errout,"st_atime: %ld\n",fileinfo->st_atime);
           fprintf(errout,"st_ctime: %ld\n",fileinfo->st_ctime);
           fprintf(errout,"st_size: %ld\n",fileinfo->st_size);
         }
 
-        if ( (err == 0) || (errno == 75) )
-        { mt=localtime(&(fileinfo->st_mtime));  /* Last modification */
-          at=localtime(&(fileinfo->st_atime));  /* Last access */
-          ct=localtime(&(fileinfo->st_ctime));  /* Creation time */
+	if ( (err == 0) || (errno == 75) )
+	{ 
+          localtime_r(&(fileinfo->st_mtime),mt);	/* Last modification */
+	  localtime_r(&(fileinfo->st_atime),at);	/* Last access */
+	  localtime_r(&(fileinfo->st_ctime),ct);	/* Creation time */
+ 	  strcpy(temp2, pathstripped);
+          fname=basename(temp2);			/* filename */
           strcpy(temp2, pathstripped);
-          fname=basename(temp2);                        /* filename */
-          strcpy(temp2, pathstripped);
-          dname=dirname(temp2);                         /* directory name */
+          dname=dirname(temp2);				/* directory name */
 
-        //debug option
-        if (opt_D > 3)
+	//debug option
+        if (opt_D > 1)
         { fprintf(errout,"mt->tm_year: %04d, mt->tm_mon: %02d, mt->tm_mday: %02d\n", 
-            (mt->tm_year)+1900, (mt->tm_mon)+1, (mt->tm_mday));
+	    (mt->tm_year)+1900, (mt->tm_mon)+1, (mt->tm_mday));
           fprintf(errout,"at->tm_year: %04d, at->tm_mon: %02d, at->tm_mday: %02d\n", 
-            (at->tm_year)+1900, (at->tm_mon)+1, (at->tm_mday));
+	    (at->tm_year)+1900, (at->tm_mon)+1, (at->tm_mday));
           fprintf(errout,"ct->tm_year: %04d, ct->tm_mon: %02d, ct->tm_mday: %02d\n", 
-            (ct->tm_year)+1900, (ct->tm_mon)+1, (ct->tm_mday));
-         }
+	    (ct->tm_year)+1900, (ct->tm_mon)+1, (ct->tm_mday));
+	 }
 
           if ( (opt_p == 1) || (opt_P == 1) )
             fprintf(outdata,"%s%c%s%c",dname, d, fname, d);
@@ -284,40 +285,40 @@ int main(int argc, char *argv[])
             fprintf(outdata,"%s%c",pathstripped,d);
 
           fprintf(outdata,"%ld%c%04d-%02d-%02d%c%04d-%02d-%02d%c%04d-%02d-%02d",  
-                          fileinfo->st_size, d,
-                          (at->tm_year)+1900, (at->tm_mon)+1, (at->tm_mday), d,
-                          (mt->tm_year)+1900, (mt->tm_mon)+1, (mt->tm_mday), d,
-                          (ct->tm_year)+1900, (ct->tm_mon)+1, (ct->tm_mday), d);
+  	                  fileinfo->st_size, d,
+	                  (at->tm_year)+1900, (at->tm_mon)+1, (at->tm_mday), d,
+	                  (mt->tm_year)+1900, (mt->tm_mon)+1, (mt->tm_mday), d,
+	                  (ct->tm_year)+1900, (ct->tm_mon)+1, (ct->tm_mday), d);
 
-          //checksum option
-          if (opt_m == 1)
-          { strcpy(checksum,"error");
+	  //checksum option
+	  if (opt_m == 1)
+	  { strcpy(checksum,"error");
 
-            do_md5sum(checksum, pathstripped);
-            fprintf(outdata,"%c%s",d,checksum);
+	    do_md5sum(checksum, pathstripped);
+	    fprintf(outdata,"%c%s",d,checksum);
 
-          }
+	  }
 
-          //current date option
+	  //current date option
           if (opt_s == 1)
             fprintf(outdata,"%c%s",d,stamp);
 
-          //userID option
-          if (opt_u == 1)
-            fprintf(outdata,"%c%d",d,(fileinfo->st_uid));
+	  //userID option
+	  if (opt_u == 1)
+	    fprintf(outdata,"%c%d",d,(fileinfo->st_uid));
 
-          //groupID option
-          if (opt_g == 1)
-            fprintf(outdata,"%c%d",d,(fileinfo->st_gid));
+	  //groupID option
+	  if (opt_g == 1)
+	    fprintf(outdata,"%c%d",d,(fileinfo->st_gid));
 
-          fprintf(outdata,"\n");
-        }
+	  fprintf(outdata,"\n");
+	}
 
-        else
-          fprintf(errout,"%s: %s\n",pathname,strerror(errno));
+	else
+	  fprintf(errout,"%s: %s\n",pathname,strerror(errno));
         pos=-1;
-        filecount++;
-        totalfiles++;
+	filecount++;
+	totalfiles++;
       }
     }
     buf[0]=buf[chunksize];
@@ -349,7 +350,7 @@ int do_md5sum(char *checksum, char *filename)
     int n, x;
     MD5_CTX c;
     char buf[MAXCHUNKMD5], tempname[MAXPATH];
-    char blah[2], *r;
+    char blah[3], *r;
     size_t bytes;
     unsigned char out[MD5_DIGEST_LENGTH];
     FILE *tempfile;
