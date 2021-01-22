@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
         break;
       case 'v': 
         printf("\n");
-        printf("bulkstat version 1.3\n");
+        printf("bulkstat version 1.4\n");
         printf("by Collin Douglas\n");
         printf("\n");
         exit(0);
